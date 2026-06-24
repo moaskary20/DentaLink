@@ -41,13 +41,18 @@
     <div class="card">
         <div class="card-title">
             @lang('dentalink.blades.wallet.payment_methods')
-            <button type="button" wire:click="addCard('visa')" class="dentalink-btn dentalink-btn-outline" style="font-size:11px;padding:5px 12px;">@lang('dentalink.blades.wallet.add_card')</button>
+            <button type="button" wire:click="openAddCardModal" class="dentalink-btn dentalink-btn-outline" style="font-size:11px;padding:5px 12px;">@lang('dentalink.blades.wallet.add_card')</button>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
             @forelse ($this->getPaymentMethods() as $method)
                 <div style="border:1.5px solid {{ $method->is_default ? 'var(--primary)' : 'var(--border)' }};border-radius:var(--radius-sm);padding:14px;text-align:center;">
                     <div style="font-size:22px;">💳</div>
-                    <div style="font-size:12px;font-weight:700;margin-top:6px;">{{ $method->label }} •••• {{ $method->last_four }}</div>
+                    <div style="font-size:12px;font-weight:700;margin-top:6px;">
+                        {{ $method->label }}
+                        @if ($method->last_four)
+                            •••• {{ $method->last_four }}
+                        @endif
+                    </div>
                     @if ($method->is_default)
                         <div style="font-size:10px;color:var(--primary);">@lang('dentalink.blades.wallet.default')</div>
                     @endif
@@ -94,4 +99,64 @@
             </table>
         </div>
     </div>
+
+    @if ($showAddCardModal)
+        <div class="dentalink-modal-backdrop" wire:click.self="closeAddCardModal">
+            <div class="dentalink-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-title">
+                <div class="dentalink-modal-header">
+                    <h3 id="add-card-title" class="dentalink-modal-title">@lang('dentalink.blades.wallet.card_form.title')</h3>
+                    <button type="button" wire:click="closeAddCardModal" class="dentalink-modal-close" aria-label="@lang('dentalink.actions.cancel')">&times;</button>
+                </div>
+
+                <form wire:submit="saveCard" class="dentalink-modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="card-type">@lang('dentalink.blades.wallet.card_form.type')</label>
+                        <select wire:model="cardForm.type" id="card-type" class="form-control filter-select">
+                            <option value="visa">Visa</option>
+                            <option value="mastercard">Mastercard</option>
+                        </select>
+                        @error('cardForm.type') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="card-holder">@lang('dentalink.blades.wallet.card_form.holder')</label>
+                        <input wire:model="cardForm.holder" id="card-holder" type="text" class="form-control" placeholder="{{ __('dentalink.blades.wallet.card_form.holder_placeholder') }}">
+                        @error('cardForm.holder') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="card-number">@lang('dentalink.blades.wallet.card_form.number')</label>
+                        <input wire:model="cardForm.number" id="card-number" type="text" inputmode="numeric" maxlength="23" class="form-control" placeholder="1234 5678 9012 3456" autocomplete="cc-number">
+                        @error('cardForm.number') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" for="card-expiry-month">@lang('dentalink.blades.wallet.card_form.expiry_month')</label>
+                            <input wire:model="cardForm.expiry_month" id="card-expiry-month" type="text" inputmode="numeric" maxlength="2" class="form-control" placeholder="MM">
+                            @error('cardForm.expiry_month') <div class="form-error">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" for="card-expiry-year">@lang('dentalink.blades.wallet.card_form.expiry_year')</label>
+                            <input wire:model="cardForm.expiry_year" id="card-expiry-year" type="text" inputmode="numeric" maxlength="2" class="form-control" placeholder="YY">
+                            @error('cardForm.expiry_year') <div class="form-error">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <label style="display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;cursor:pointer;">
+                        <input wire:model="cardForm.is_default" type="checkbox" style="width:16px;height:16px;">
+                        @lang('dentalink.blades.wallet.card_form.set_default')
+                    </label>
+
+                    <div class="dentalink-modal-footer">
+                        <button type="button" wire:click="closeAddCardModal" class="dentalink-btn dentalink-btn-outline">@lang('dentalink.actions.cancel')</button>
+                        <button type="submit" class="dentalink-btn dentalink-btn-primary" wire:loading.attr="disabled" wire:target="saveCard">
+                            <span wire:loading.remove wire:target="saveCard">@lang('dentalink.blades.wallet.card_form.save')</span>
+                            <span wire:loading wire:target="saveCard">@lang('dentalink.blades.wallet.card_form.saving')</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </x-filament-panels::page>

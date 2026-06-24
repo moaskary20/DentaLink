@@ -157,6 +157,11 @@ return [
                     'text' => 'Bundling Crown + Bridge orders with the same lab can reduce shipping and save ~15%.',
                 ],
             ],
+            'quick_prompts' => [
+                'find_lab' => 'What is the best lab for a crown?',
+                'analyze' => 'Analyze my order history',
+                'suggest' => 'Suggest a suitable material',
+            ],
         ],
         'settings' => [
             'title' => 'Settings',
@@ -511,6 +516,7 @@ return [
         'continue' => 'Continue',
         'save_changes' => 'Save Changes',
         'send' => 'Send',
+        'cancel' => 'Cancel',
     ],
 
     'common' => [
@@ -520,6 +526,17 @@ return [
         'em_dash' => '—',
         'system' => 'System',
         'na' => 'N/A',
+    ],
+
+    'ai_chat' => [
+        'lab_recommend' => 'Based on your history, I recommend **:name** — rating :rating★, from $:price, ~:days days delivery. Match score: :score%.',
+        'no_lab' => 'Browse approved labs in the Laboratories section and filter by country or service type.',
+        'order_status' => 'Your latest order **#:number** is currently **:status**. Expected delivery: :delivery.',
+        'no_orders' => 'You have no orders yet. Create one from New Order.',
+        'upload_help' => 'Upload JPG/PNG photos, STL/OBJ 3D scans, or MP4 case videos in Step 2. AI checks file completeness before submission.',
+        'crown_material' => 'For Zirconia crowns, **:lab** offers :service at $:price with :days-day turnaround.',
+        'crown_material_fallback' => 'Zirconia crowns typically cost $240–$280 with 5–7 day turnaround in Qatar labs.',
+        'default' => 'I can help you choose a lab, validate files, track orders, or estimate delivery. Ask me anything about your dental lab workflow.',
     ],
 
     'units' => [
@@ -592,6 +609,25 @@ return [
             'transaction_history' => 'Transaction History',
             'fallback_tx1' => 'Crown Zirconia — Doha Lab',
             'fallback_tx2' => 'Balance deposit',
+            'card_form' => [
+                'title' => 'Add Payment Card',
+                'type' => 'Card type',
+                'holder' => 'Cardholder name',
+                'holder_placeholder' => 'Name on card',
+                'number' => 'Card number',
+                'expiry_month' => 'Expiry month',
+                'expiry_year' => 'Expiry year',
+                'set_default' => 'Set as default payment method',
+                'save' => 'Save card',
+                'saving' => 'Saving...',
+                'type_required' => 'Please select a card type.',
+                'holder_required' => 'Cardholder name is required.',
+                'number_required' => 'Card number is required.',
+                'number_invalid' => 'Enter a valid card number (13–19 digits).',
+                'expiry_required' => 'Expiry date is required.',
+                'expiry_invalid' => 'Enter a valid expiry month (01–12).',
+                'expiry_past' => 'This card has expired.',
+            ],
         ],
         'order_tracking' => [
             'title' => 'Track Order #:number',
@@ -639,6 +675,8 @@ return [
             'quick_analyze' => 'Analyze Order History',
             'quick_suggest' => 'Suggest Material',
             'insights' => 'AI Insights',
+            'thinking' => 'Thinking...',
+            'matched_labs' => 'Top Matched Labs',
         ],
         'chat' => [
             'title' => 'Lab Messaging',

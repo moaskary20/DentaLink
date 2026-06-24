@@ -6,9 +6,11 @@ use App\Models\PaymentMethod;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Services\PaymentService;
+use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class WalletPage extends Page
 {
@@ -36,6 +38,17 @@ class WalletPage extends Page
     public float $depositAmount = 500;
 
     public float $withdrawAmount = 100;
+
+    public bool $showAddCardModal = false;
+
+    public array $cardForm = [
+        'type' => 'visa',
+        'holder' => '',
+        'number' => '',
+        'expiry_month' => '',
+        'expiry_year' => '',
+        'is_default' => false,
+    ];
 
     public function getWallet(): ?Wallet
     {
@@ -83,11 +96,88 @@ class WalletPage extends Page
         }
     }
 
+    public function openAddCardModal(): void
+    {
+        $this->resetCardForm();
+        $this->showAddCardModal = true;
+    }
+
+    public function closeAddCardModal(): void
+    {
+        $this->showAddCardModal = false;
+        $this->resetCardForm();
+    }
+
+    public function saveCard(): void
+    {
+        $this->validate([
+            'cardForm.type' => 'required|in:visa,mastercard',
+            'cardForm.holder' => 'required|string|max:100',
+            'cardForm.number' => 'required|string|min:13|max:23',
+            'cardForm.expiry_month' => 'required|digits:2',
+            'cardForm.expiry_year' => 'required|digits:2',
+            'cardForm.is_default' => 'boolean',
+        ], [
+            'cardForm.type.required' => __('dentalink.blades.wallet.card_form.type_required'),
+            'cardForm.holder.required' => __('dentalink.blades.wallet.card_form.holder_required'),
+            'cardForm.number.required' => __('dentalink.blades.wallet.card_form.number_required'),
+            'cardForm.expiry_month.required' => __('dentalink.blades.wallet.card_form.expiry_required'),
+            'cardForm.expiry_year.required' => __('dentalink.blades.wallet.card_form.expiry_required'),
+        ]);
+
+        $digits = preg_replace('/\D/', '', $this->cardForm['number']) ?? '';
+
+        if (strlen($digits) < 13 || strlen($digits) > 19) {
+            throw ValidationException::withMessages([
+                'cardForm.number' => __('dentalink.blades.wallet.card_form.number_invalid'),
+            ]);
+        }
+
+        $month = (int) $this->cardForm['expiry_month'];
+
+        if ($month < 1 || $month > 12) {
+            throw ValidationException::withMessages([
+                'cardForm.expiry_month' => __('dentalink.blades.wallet.card_form.expiry_invalid'),
+            ]);
+        }
+
+        $expiry = Carbon::createFromDate(2000 + (int) $this->cardForm['expiry_year'], $month, 1)->endOfMonth();
+
+        if ($expiry->isPast()) {
+            throw ValidationException::withMessages([
+                'cardForm.expiry_year' => __('dentalink.blades.wallet.card_form.expiry_past'),
+            ]);
+        }
+
+        $type = $this->cardForm['type'];
+        $lastFour = substr($digits, -4);
+        $label = match ($type) {
+            'visa' => 'Visa',
+            'mastercard' => 'Mastercard',
+            default => ucfirst($type),
+        };
+
+        app(PaymentService::class)->addPaymentMethod(
+            Auth::user(),
+            $type,
+            $label,
+            $lastFour,
+            (bool) $this->cardForm['is_default'],
+        );
+
+        $this->closeAddCardModal();
+
+        Notification::make()
+            ->title(__('dentalink.notifications.payment_method_added'))
+            ->success()
+            ->send();
+    }
+
     public function addCard(string $type = 'visa'): void
     {
         $labels = [
-            'visa' => __('dentalink.pages.wallet.payment_methods.visa', ['last4' => random_int(1000, 9999)]),
-            'mastercard' => __('dentalink.pages.wallet.payment_methods.mastercard', ['last4' => random_int(1000, 9999)]),
+            'visa' => 'Visa',
+            'mastercard' => 'Mastercard',
             'apple_pay' => __('dentalink.pages.wallet.payment_methods.apple_pay'),
             'google_pay' => __('dentalink.pages.wallet.payment_methods.google_pay'),
         ];
@@ -96,7 +186,7 @@ class WalletPage extends Page
             Auth::user(),
             $type,
             $labels[$type] ?? ucfirst($type),
-            in_array($type, ['visa', 'mastercard']) ? substr($labels[$type], -4) : null
+            in_array($type, ['visa', 'mastercard']) ? (string) random_int(1000, 9999) : null,
         );
 
         Notification::make()->title(__('dentalink.notifications.payment_method_added'))->success()->send();
@@ -118,5 +208,19 @@ class WalletPage extends Page
             ->latest()
             ->limit(10)
             ->get();
+    }
+
+    protected function resetCardForm(): void
+    {
+        $this->cardForm = [
+            'type' => 'visa',
+            'holder' => '',
+            'number' => '',
+            'expiry_month' => '',
+            'expiry_year' => '',
+            'is_default' => false,
+        ];
+
+        $this->resetValidation();
     }
 }

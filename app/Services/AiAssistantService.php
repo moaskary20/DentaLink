@@ -82,35 +82,61 @@ class AiAssistantService
     {
         $lower = strtolower($prompt);
 
-        if (str_contains($lower, 'lab') || str_contains($lower, 'recommend')) {
+        if ($this->promptMatches($prompt, $lower, ['lab', 'recommend', 'مختبر', 'توصية', 'أفضل', 'laboratoire', 'recommand'])) {
             $top = $this->matchLabs($doctor)->first();
 
             return $top
-                ? "Based on your history, I recommend **{$top->name}** — rating {$top->rating}★, from \${$top->starting_price}, ~{$top->avg_turnaround_days} days delivery. Match score: {$top->match_score}%."
-                : 'Browse approved labs in the Laboratories section and filter by country or service type.';
+                ? __('dentalink.ai_chat.lab_recommend', [
+                    'name' => $top->name,
+                    'rating' => $top->rating,
+                    'price' => $top->starting_price,
+                    'days' => $top->avg_turnaround_days,
+                    'score' => $top->match_score,
+                ])
+                : __('dentalink.ai_chat.no_lab');
         }
 
-        if (str_contains($lower, 'track') || str_contains($lower, 'order')) {
+        if ($this->promptMatches($prompt, $lower, ['track', 'order', 'طلب', 'تتبع', 'سجل', 'historique', 'commande'])) {
             $latest = Order::query()->where('doctor_id', $doctor->id)->latest()->first();
 
             return $latest
-                ? "Your latest order **#{$latest->order_number}** is currently **{$latest->status->label()}**. Expected delivery: {$latest->expected_delivery_at?->format('M j, Y')}."
-                : 'You have no orders yet. Create one from New Order.';
+                ? __('dentalink.ai_chat.order_status', [
+                    'number' => $latest->order_number,
+                    'status' => $latest->status->label(),
+                    'delivery' => $latest->expected_delivery_at?->format('M j, Y') ?? '—',
+                ])
+                : __('dentalink.ai_chat.no_orders');
         }
 
-        if (str_contains($lower, 'upload') || str_contains($lower, 'file')) {
-            return 'Upload JPG/PNG photos, STL/OBJ 3D scans, or MP4 case videos in Step 2. AI checks file completeness before submission.';
+        if ($this->promptMatches($prompt, $lower, ['upload', 'file', 'ملف', 'رفع', 'fichier', 'télévers'])) {
+            return __('dentalink.ai_chat.upload_help');
         }
 
-        if (str_contains($lower, 'zirconia') || str_contains($lower, 'crown')) {
+        if ($this->promptMatches($prompt, $lower, ['zirconia', 'crown', 'تاج', 'زركونيا', 'مادة', 'material', 'couronne', 'matériau'])) {
             $service = LabService::query()->where('name', 'like', '%Zirconia%')->orderBy('price')->first();
 
             return $service
-                ? "For Zirconia crowns, **{$service->lab?->name}** offers {$service->name} at \${$service->price} with {$service->turnaround_days}-day turnaround."
-                : 'Zirconia crowns typically cost $240–$280 with 5–7 day turnaround in Qatar labs.';
+                ? __('dentalink.ai_chat.crown_material', [
+                    'lab' => $service->lab?->name,
+                    'service' => $service->name,
+                    'price' => $service->price,
+                    'days' => $service->turnaround_days,
+                ])
+                : __('dentalink.ai_chat.crown_material_fallback');
         }
 
-        return 'I can help you choose a lab, validate files, track orders, or estimate delivery. Ask me anything about your dental lab workflow.';
+        return __('dentalink.ai_chat.default');
+    }
+
+    protected function promptMatches(string $prompt, string $lower, array $keywords): bool
+    {
+        foreach ($keywords as $keyword) {
+            if (str_contains($lower, strtolower($keyword)) || str_contains($prompt, $keyword)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function detectOverdueOrders(User $doctor): Collection

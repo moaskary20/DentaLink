@@ -56,12 +56,24 @@ class AiAssistantPage extends Page
             return;
         }
 
-        $question = $this->prompt;
+        $question = trim($this->prompt);
         $this->chatHistory[] = ['role' => 'user', 'text' => $question];
 
         $reply = app(AiAssistantService::class)->chatbotReply(Auth::user(), $question);
         $this->chatHistory[] = ['role' => 'assistant', 'text' => $reply];
         $this->prompt = '';
+    }
+
+    public function quickAsk(string $action): void
+    {
+        $prompts = [
+            'find_lab' => __('dentalink.pages.ai_assistant.quick_prompts.find_lab'),
+            'analyze' => __('dentalink.pages.ai_assistant.quick_prompts.analyze'),
+            'suggest' => __('dentalink.pages.ai_assistant.quick_prompts.suggest'),
+        ];
+
+        $this->prompt = $prompts[$action] ?? '';
+        $this->askAi();
     }
 
     protected function buildSuggestions(AiAssistantService $ai): array

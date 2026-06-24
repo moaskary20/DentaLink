@@ -145,8 +145,24 @@
     border: 1.5px solid var(--border);
     border-radius: var(--radius-sm);
     font-size: 13px;
-    background: var(--card);
+    background-color: var(--card);
     color: var(--text);
+}
+
+.dentalink-page .filters-bar select.filter-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    background-position: right 0.75rem center;
+    padding-inline-end: 2.25rem;
+    min-width: 140px;
+    cursor: pointer;
+}
+
+[dir='rtl'] .dentalink-page .filters-bar select.filter-select {
+    background-position: left 0.75rem center !important;
 }
 
 .labs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -191,6 +207,13 @@
 }
 .ai-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
 .ai-desc { font-size: 12px; opacity: 0.85; line-height: 1.5; }
+.ai-card .chat-messages { padding: 0; }
+.ai-card .chat-bubble.received {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+.ai-card .chat-bubble.received p { margin: 0; }
+.ai-card .chat-bubble.sent p { margin: 0; }
 .ai-suggestion {
     display: flex;
     align-items: flex-start;

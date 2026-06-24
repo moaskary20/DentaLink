@@ -44,14 +44,27 @@ class PaymentService
         ]);
     }
 
-    public function addPaymentMethod(User $user, string $type, string $label, ?string $lastFour = null): PaymentMethod
-    {
+    public function addPaymentMethod(
+        User $user,
+        string $type,
+        string $label,
+        ?string $lastFour = null,
+        ?bool $isDefault = null,
+    ): PaymentMethod {
+        $isDefault ??= PaymentMethod::query()->where('user_id', $user->id)->count() === 0;
+
+        if ($isDefault) {
+            PaymentMethod::query()
+                ->where('user_id', $user->id)
+                ->update(['is_default' => false]);
+        }
+
         return PaymentMethod::query()->create([
             'user_id' => $user->id,
             'type' => $type,
             'label' => $label,
             'last_four' => $lastFour,
-            'is_default' => PaymentMethod::query()->where('user_id', $user->id)->count() === 0,
+            'is_default' => $isDefault,
         ]);
     }
 
