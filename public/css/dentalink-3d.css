@@ -1,0 +1,437 @@
+/* ===== DentaLink 3D Design System ===== */
+
+:root {
+    --dl-3d-depth-sm: 0 2px 0 rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.06);
+    --dl-3d-depth-md: 0 4px 0 rgba(0, 0, 0, 0.05), 0 8px 16px rgba(10, 110, 189, 0.12), 0 16px 32px rgba(10, 110, 189, 0.08);
+    --dl-3d-depth-lg: 0 6px 0 rgba(0, 0, 0, 0.04), 0 12px 24px rgba(10, 110, 189, 0.14), 0 24px 48px rgba(10, 110, 189, 0.1);
+    --dl-3d-inset: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Perspective scene — only on page content, not layout shell */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-page {
+    perspective: 1400px;
+    perspective-origin: 50% 20%;
+}
+
+/* Floating 3D background shapes */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::before,
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::after {
+    content: '';
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 20px;
+    opacity: 0.55;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::before {
+    width: 140px;
+    height: 140px;
+    top: 12%;
+    inset-inline-end: 4%;
+    background: linear-gradient(145deg, rgba(10, 110, 189, 0.18), rgba(10, 110, 189, 0.04));
+    box-shadow: 0 25px 50px rgba(10, 110, 189, 0.15);
+    transform: rotateX(55deg) rotateZ(-25deg) translateZ(-80px);
+    animation: dl-3d-float-a 8s ease-in-out infinite;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::after {
+    width: 100px;
+    height: 100px;
+    bottom: 18%;
+    inset-inline-start: 3%;
+    background: linear-gradient(145deg, rgba(29, 168, 154, 0.2), rgba(29, 168, 154, 0.05));
+    box-shadow: 0 20px 40px rgba(29, 168, 154, 0.12);
+    transform: rotateX(50deg) rotateZ(35deg) translateZ(-60px);
+    animation: dl-3d-float-b 10s ease-in-out infinite;
+    border-radius: 50%;
+}
+
+@keyframes dl-3d-float-a {
+    0%, 100% { transform: rotateX(55deg) rotateZ(-25deg) translateZ(-80px) translateY(0); }
+    50% { transform: rotateX(55deg) rotateZ(-15deg) translateZ(-60px) translateY(-20px); }
+}
+
+@keyframes dl-3d-float-b {
+    0%, 100% { transform: rotateX(50deg) rotateZ(35deg) translateZ(-60px) translateY(0); }
+    50% { transform: rotateX(45deg) rotateZ(45deg) translateZ(-40px) translateY(15px); }
+}
+
+/* Sidebar 3D extrusion */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-sidebar {
+    box-shadow:
+        4px 0 0 rgba(0, 0, 0, 0.15),
+        8px 0 24px rgba(0, 0, 0, 0.2),
+        inset -1px 0 0 rgba(255, 255, 255, 0.05) !important;
+    transform: translateZ(20px);
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-sidebar-item.fi-active .fi-sidebar-item-button,
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-sidebar-item-active .fi-sidebar-item-button {
+    box-shadow:
+        0 4px 0 #085A9A,
+        0 6px 16px rgba(10, 110, 189, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transform: translateZ(8px) !important;
+}
+
+/* Topbar 3D lift */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-topbar {
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.8),
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 8px 24px rgba(10, 110, 189, 0.06) !important;
+}
+
+/* 3D Cards — stats */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-wi-stats-overview-stat {
+    transform-style: preserve-3d;
+    box-shadow:
+        var(--dl-3d-inset),
+        var(--dl-3d-depth-md) !important;
+    border-bottom: 3px solid rgba(10, 110, 189, 0.12) !important;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease !important;
+    will-change: transform;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-wi-stats-overview-stat::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 50%);
+    pointer-events: none;
+    transform: translateZ(1px);
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-wi-stats-overview-stat-icon {
+    transform: translateZ(16px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 3D Sections */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-section {
+    transform-style: preserve-3d;
+    box-shadow:
+        var(--dl-3d-inset),
+        var(--dl-3d-depth-sm) !important;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease !important;
+    will-change: transform;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-section:hover {
+    box-shadow:
+        var(--dl-3d-inset),
+        var(--dl-3d-depth-lg) !important;
+}
+
+/* 3D Tables */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-ta-ctn {
+    transform-style: preserve-3d;
+    box-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.04),
+        0 6px 0 rgba(0, 0, 0, 0.03),
+        0 12px 24px rgba(10, 110, 189, 0.1) !important;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease !important;
+    will-change: transform;
+}
+
+/* 3D Buttons — extruded press */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-primary {
+    box-shadow:
+        0 4px 0 #085A9A,
+        0 6px 14px rgba(10, 110, 189, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(0) translateZ(4px);
+    border-bottom: none !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-primary:hover {
+    box-shadow:
+        0 5px 0 #085A9A,
+        0 10px 20px rgba(10, 110, 189, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px) translateZ(8px) !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-primary:active {
+    box-shadow:
+        0 1px 0 #085A9A,
+        0 2px 6px rgba(10, 110, 189, 0.25) !important;
+    transform: translateY(3px) translateZ(0) !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-success {
+    box-shadow: 0 4px 0 #2d7a1a, 0 6px 12px rgba(59, 153, 34, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-success:active {
+    box-shadow: 0 1px 0 #2d7a1a !important;
+    transform: translateY(3px) !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-danger {
+    box-shadow: 0 4px 0 #c43a39, 0 6px 12px rgba(226, 75, 74, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-btn-color-danger:active {
+    box-shadow: 0 1px 0 #c43a39 !important;
+    transform: translateY(3px) !important;
+}
+
+/* 3D Badges — pill depth */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-badge {
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateZ(2px);
+}
+
+/* 3D Login card */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-simple-main {
+    transform-style: preserve-3d;
+    box-shadow:
+        var(--dl-3d-inset),
+        0 8px 0 rgba(0, 0, 0, 0.04),
+        0 16px 32px rgba(10, 110, 189, 0.15),
+        0 32px 64px rgba(10, 110, 189, 0.1) !important;
+    will-change: transform;
+}
+
+/* 3D Modal */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-modal-window {
+    box-shadow:
+        0 12px 0 rgba(0, 0, 0, 0.05),
+        0 24px 48px rgba(0, 0, 0, 0.15),
+        0 48px 96px rgba(10, 110, 189, 0.1) !important;
+    transform-style: preserve-3d;
+}
+
+/* 3D Input fields */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-input-wrp {
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.04), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-input-wrp:focus-within {
+    transform: translateZ(4px);
+    box-shadow:
+        0 4px 0 rgba(10, 110, 189, 0.15),
+        0 0 0 3px rgba(10, 110, 189, 0.12),
+        inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 3D Tabs */
+body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-tabs-item.fi-active {
+    box-shadow: 0 3px 0 rgba(10, 110, 189, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px) translateZ(4px);
+}
+
+/* Tilt helper class */
+.dl-tilt-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.12s ease-out, box-shadow 0.25s ease !important;
+    will-change: transform;
+}
+
+/* ===== Custom pages (dentalink-page) 3D ===== */
+
+.dentalink-page {
+    perspective: 1200px;
+}
+
+.dentalink-page .stat-card,
+.dentalink-page .lab-card,
+.dentalink-page .card {
+    transform-style: preserve-3d;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 4px 0 rgba(0, 0, 0, 0.04),
+        0 8px 16px rgba(10, 110, 189, 0.1),
+        0 16px 32px rgba(10, 110, 189, 0.06);
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease;
+    will-change: transform;
+    border-bottom: 3px solid rgba(10, 110, 189, 0.08);
+}
+
+.dentalink-page .stat-card::after,
+.dentalink-page .lab-card::after,
+.dentalink-page .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.dentalink-page .stat-card,
+.dentalink-page .lab-card,
+.dentalink-page .card {
+    position: relative;
+    overflow: hidden;
+}
+
+.dentalink-page .stat-icon {
+    transform: translateZ(20px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.dentalink-page .wallet-card {
+    transform-style: preserve-3d;
+    box-shadow:
+        0 8px 0 #085A9A,
+        0 16px 32px rgba(10, 110, 189, 0.35),
+        0 32px 64px rgba(10, 110, 189, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    animation: dl-3d-wallet-float 5s ease-in-out infinite;
+}
+
+@keyframes dl-3d-wallet-float {
+    0%, 100% { transform: translateY(0) rotateX(2deg); }
+    50% { transform: translateY(-6px) rotateX(4deg); }
+}
+
+.dentalink-page .ai-card {
+    transform-style: preserve-3d;
+    box-shadow:
+        0 6px 0 rgba(0, 0, 0, 0.2),
+        0 12px 28px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dentalink-page .dentalink-btn-primary {
+    box-shadow: 0 4px 0 #085A9A, 0 6px 14px rgba(10, 110, 189, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transform: translateZ(4px);
+}
+
+.dentalink-page .dentalink-btn-primary:hover {
+    transform: translateY(-2px) translateZ(8px);
+    box-shadow: 0 6px 0 #085A9A, 0 10px 20px rgba(10, 110, 189, 0.4);
+}
+
+.dentalink-page .dentalink-btn-primary:active {
+    transform: translateY(3px) translateZ(0);
+    box-shadow: 0 1px 0 #085A9A;
+}
+
+.dentalink-page .step-tab.active {
+    box-shadow: 0 3px 0 rgba(10, 110, 189, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px) translateZ(6px);
+}
+
+.dentalink-page .badge {
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.dentalink-page .timeline-dot.active {
+    box-shadow: 0 4px 0 #2d7a1a, 0 6px 12px rgba(59, 153, 34, 0.4);
+    transform: translateZ(8px);
+}
+
+.dentalink-page .timeline-dot.done {
+    box-shadow: 0 3px 0 #2d7a1a, 0 4px 8px rgba(59, 153, 34, 0.3);
+}
+
+/* ===== Landing page 3D ===== */
+
+.landing {
+    perspective: 1400px;
+}
+
+.landing-3d-shapes {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.dl-shape {
+    position: absolute;
+    transform-style: preserve-3d;
+    animation: dl-3d-shape-spin 20s linear infinite;
+}
+
+.dl-shape--cube {
+    width: 80px;
+    height: 80px;
+    top: 18%;
+    left: 8%;
+    background: linear-gradient(145deg, rgba(10, 110, 189, 0.2), rgba(10, 110, 189, 0.05));
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(10, 110, 189, 0.2);
+    transform: rotateX(45deg) rotateZ(30deg);
+    animation: dl-3d-float-a 9s ease-in-out infinite;
+}
+
+.dl-shape--ring {
+    width: 120px;
+    height: 120px;
+    bottom: 22%;
+    right: 10%;
+    border: 12px solid rgba(29, 168, 154, 0.15);
+    border-radius: 50%;
+    box-shadow: 0 25px 50px rgba(29, 168, 154, 0.15), inset 0 0 20px rgba(29, 168, 154, 0.1);
+    transform: rotateX(60deg);
+    animation: dl-3d-float-b 11s ease-in-out infinite;
+}
+
+.dl-shape--pill {
+    width: 60px;
+    height: 100px;
+    top: 55%;
+    left: 15%;
+    background: linear-gradient(180deg, rgba(244, 169, 50, 0.25), rgba(244, 169, 50, 0.08));
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(244, 169, 50, 0.15);
+    transform: rotateX(40deg) rotateZ(-20deg);
+    animation: dl-3d-float-a 7s ease-in-out infinite reverse;
+}
+
+.portal-card {
+    transform-style: preserve-3d;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 6px 0 rgba(0, 0, 0, 0.04),
+        0 12px 24px rgba(10, 110, 189, 0.1),
+        0 24px 48px rgba(10, 110, 189, 0.06) !important;
+    will-change: transform;
+    border-bottom: 4px solid rgba(10, 110, 189, 0.1) !important;
+}
+
+.portal-card .portal-icon {
+    transform: translateZ(24px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease;
+}
+
+.portal-card:hover .portal-icon {
+    transform: translateZ(36px) scale(1.08);
+}
+
+.portal-card .portal-title,
+.portal-card .portal-desc,
+.portal-card .portal-btn {
+    transform: translateZ(8px);
+}
+
+.hero-badge {
+    box-shadow: 0 3px 0 rgba(10, 110, 189, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateZ(10px);
+}
+
+.logo {
+    text-shadow: 0 2px 4px rgba(10, 110, 189, 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dl-shape,
+    body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::before,
+    body:is(.fi-panel-admin, .fi-panel-app, .fi-panel-lab) .fi-main-ctn::after,
+    .dentalink-page .wallet-card {
+        animation: none !important;
+    }
+
+    .dl-tilt-3d {
+        transform: none !important;
+    }
+}
