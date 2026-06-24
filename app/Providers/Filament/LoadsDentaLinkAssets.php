@@ -9,14 +9,14 @@ trait LoadsDentaLinkAssets
     protected function dentalinkStylesHook(): \Closure
     {
         return fn (): HtmlString => new HtmlString(
-            '<link rel="stylesheet" href="'.asset('css/dentalink.css').'?v=7">'
+            '<link rel="stylesheet" href="'.asset('css/dentalink.css').'?v=8">'
         );
     }
 
     protected function dentalinkPanelStylesHook(): \Closure
     {
         return fn (): HtmlString => new HtmlString(
-            '<link rel="stylesheet" href="'.asset('css/dentalink.css').'?v=7">'.
+            '<link rel="stylesheet" href="'.asset('css/dentalink.css').'?v=8">'.
             '<link rel="stylesheet" href="'.asset('css/dentalink-panel.css').'?v=6">'.
             '<link rel="stylesheet" href="'.asset('css/dentalink-3d.css').'?v=2">'
         );
