@@ -159,12 +159,18 @@ class DentaLinkSeeder extends Seeder
 
         foreach ($labs as $lab) {
             foreach ($services as [$name, $category, $price, $days]) {
+                // Keep service turnaround aligned with each lab's real speed profile.
+                $offset = $days - 8;
+                $turnaroundDays = max(1, (int) round($lab->avg_turnaround_days + $offset));
+                $servicePrice = max(50, $price + (int) round(($lab->starting_price - 240) * 0.4) + rand(-15, 25));
+
                 LabService::create([
                     'lab_id' => $lab->id,
                     'name' => $name,
                     'category' => $category,
-                    'price' => $price + rand(-20, 40),
-                    'turnaround_days' => $days,
+                    'price' => $servicePrice,
+                    'turnaround_days' => $turnaroundDays,
+                    'is_active' => true,
                 ]);
             }
         }
