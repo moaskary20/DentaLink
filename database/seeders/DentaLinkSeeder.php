@@ -13,7 +13,6 @@ use App\Models\CommissionSetting;
 use App\Models\Conversation;
 use App\Models\DoctorProfile;
 use App\Models\Lab;
-use App\Models\LabService;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\OrderLog;
@@ -149,38 +148,12 @@ class DentaLinkSeeder extends Seeder
             ]);
         }
 
-        $services = [
-            ['Crown - Zirconia', 'Crown', 280, 5],
-            ['Crown - PFM', 'Crown', 210, 6],
-            ['Bridge 3-Unit', 'Bridge', 420, 7],
-            ['Implant Crown', 'Implant', 380, 10],
-            ['Veneer Set x6', 'Veneer', 650, 12],
-        ];
-
-        foreach ($labs as $lab) {
-            foreach ($services as [$name, $category, $price, $days]) {
-                // Keep service turnaround aligned with each lab's real speed profile.
-                $offset = $days - 8;
-                $turnaroundDays = max(1, (int) round($lab->avg_turnaround_days + $offset));
-                $servicePrice = max(50, $price + (int) round(($lab->starting_price - 240) * 0.4) + rand(-15, 25));
-
-                LabService::create([
-                    'lab_id' => $lab->id,
-                    'name' => $name,
-                    'category' => $category,
-                    'price' => $servicePrice,
-                    'turnaround_days' => $turnaroundDays,
-                    'is_active' => true,
-                ]);
-            }
-        }
-
         $ordersData = [
-            ['ORD-2847', 0, 'Crown - Zirconia', OrderStatus::InProgress, 280, 5, true, '2025-07-25'],
-            ['ORD-2845', 1, 'Bridge 3-Unit', OrderStatus::QualityReview, 420, 7, false, '2025-07-22'],
-            ['ORD-2841', 3, 'Implant Crown', OrderStatus::Shipping, 380, 10, false, '2025-07-20'],
-            ['ORD-2838', 2, 'Veneer Set x6', OrderStatus::Completed, 650, 12, false, '2025-07-17'],
-            ['ORD-2831', 0, 'Crown - PFM', OrderStatus::Completed, 210, 6, false, '2025-07-10'],
+            ['ORD-2847', 0, 'Full Zirconia', OrderStatus::InProgress, 200, 4, true, '2025-07-25'],
+            ['ORD-2845', 1, 'Acrylic Partial Denture 3 to 6 Units', OrderStatus::QualityReview, 250, 4, false, '2025-07-22'],
+            ['ORD-2841', 3, 'Hybrid Denture Over Implant', OrderStatus::Shipping, 600, 4, false, '2025-07-20'],
+            ['ORD-2838', 2, 'Snap On (Upper and Lower)', OrderStatus::Completed, 500, 4, false, '2025-07-17'],
+            ['ORD-2831', 0, 'PFM Crown', OrderStatus::Completed, 150, 4, false, '2025-07-10'],
         ];
 
         $orders = [];
@@ -244,10 +217,10 @@ class DentaLinkSeeder extends Seeder
 
         $wallet = Wallet::create(['user_id' => $doctor->id, 'balance' => 1240.00, 'currency' => 'USD']);
 
-        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[0]->id, 'type' => TransactionType::Payment, 'description' => 'Crown Zirconia — Doha Specialized Lab', 'amount' => -294, 'status' => PaymentStatus::Completed, 'created_at' => now()->subDays(4)]);
+        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[0]->id, 'type' => TransactionType::Payment, 'description' => 'Full Zirconia — Doha Specialized Lab', 'amount' => -210, 'status' => PaymentStatus::Completed, 'created_at' => now()->subDays(4)]);
         Transaction::create(['wallet_id' => $wallet->id, 'type' => TransactionType::Deposit, 'description' => 'Balance deposit', 'amount' => 500, 'status' => PaymentStatus::Completed, 'created_at' => now()->subDays(9)]);
-        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[3]->id, 'type' => TransactionType::Payment, 'description' => 'Veneer x6 — ProDental Qatar', 'amount' => -650, 'status' => PaymentStatus::Completed, 'created_at' => now()->subDays(13)]);
-        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[1]->id, 'type' => TransactionType::Payment, 'description' => 'Bridge — Gulf Dental Lab', 'amount' => -340, 'status' => PaymentStatus::Pending, 'created_at' => now()->subDays(20)]);
+        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[3]->id, 'type' => TransactionType::Payment, 'description' => 'Snap On — ProDental Qatar', 'amount' => -500, 'status' => PaymentStatus::Completed, 'created_at' => now()->subDays(13)]);
+        Transaction::create(['wallet_id' => $wallet->id, 'order_id' => $orders[1]->id, 'type' => TransactionType::Payment, 'description' => 'Partial Denture — Gulf Dental Lab', 'amount' => -262.50, 'status' => PaymentStatus::Pending, 'created_at' => now()->subDays(20)]);
 
         PaymentMethod::create(['user_id' => $doctor->id, 'type' => 'visa', 'label' => 'Visa •••• 4521', 'last_four' => '4521', 'is_default' => true]);
         PaymentMethod::create(['user_id' => $doctor->id, 'type' => 'mastercard', 'label' => 'Mastercard •••• 8834', 'last_four' => '8834']);

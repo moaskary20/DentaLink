@@ -294,6 +294,7 @@ return [
     'service_categories' => [
         'crown' => 'تاج', 'bridge' => 'جسر', 'implant' => 'زرعة', 'veneer' => 'قشرة',
         'denture' => 'طقم أسنان', 'full_denture' => 'طقم أسنان كامل',
+        'orthodontic' => 'تقويم وأجهزة',
     ],
 
     'ratings' => [

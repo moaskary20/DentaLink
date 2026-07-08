@@ -5,6 +5,7 @@ namespace App\Filament\Lab\Resources;
 use App\Filament\Lab\Resources\LabServiceResource\Pages;
 use App\Models\LabService;
 use App\Support\CurrentLab;
+use App\Support\LabServiceCategories;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,13 +50,7 @@ class LabServiceResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required(),
                 Forms\Components\Select::make('category')
-                    ->options([
-                        'Crown' => __('dentalink.service_categories.crown'),
-                        'Bridge' => __('dentalink.service_categories.bridge'),
-                        'Implant' => __('dentalink.service_categories.implant'),
-                        'Veneer' => __('dentalink.service_categories.veneer'),
-                        'Denture' => __('dentalink.service_categories.denture'),
-                    ]),
+                    ->options(LabServiceCategories::options()),
                 Forms\Components\TextInput::make('price')
                     ->numeric()
                     ->prefix('$')

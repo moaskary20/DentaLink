@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\LabServiceResource\Pages;
 use App\Models\LabService;
+use App\Support\LabServiceCategories;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -40,7 +41,8 @@ class LabServiceResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required(),
-                Forms\Components\TextInput::make('category'),
+                Forms\Components\Select::make('category')
+                    ->options(LabServiceCategories::options()),
                 Forms\Components\TextInput::make('price')
                     ->numeric()
                     ->prefix('$')

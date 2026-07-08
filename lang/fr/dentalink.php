@@ -294,6 +294,7 @@ return [
     'service_categories' => [
         'crown' => 'Couronne', 'bridge' => 'Bridge', 'implant' => 'Implant', 'veneer' => 'Facette',
         'denture' => 'Prothèse', 'full_denture' => 'Prothèse complète',
+        'orthodontic' => 'Orthodontie et appareils',
     ],
 
     'ratings' => [

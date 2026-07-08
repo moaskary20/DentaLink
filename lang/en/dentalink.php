@@ -417,6 +417,7 @@ return [
         'veneer' => 'Veneer',
         'denture' => 'Denture',
         'full_denture' => 'Full Denture',
+        'orthodontic' => 'Orthodontic & Appliances',
     ],
 
     'ratings' => [

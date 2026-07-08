@@ -576,13 +576,7 @@ class BrowseLabs extends Page
 
     public function getServiceOptions(): array
     {
-        return [
-            'Crown' => __('dentalink.service_categories.crown'),
-            'Bridge' => __('dentalink.service_categories.bridge'),
-            'Implant' => __('dentalink.service_categories.implant'),
-            'Veneer' => __('dentalink.service_categories.veneer'),
-            'Denture' => __('dentalink.service_categories.denture'),
-        ];
+        return \App\Support\LabServiceCategories::options();
     }
 
     /**
