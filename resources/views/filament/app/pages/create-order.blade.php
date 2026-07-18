@@ -22,7 +22,7 @@
                     @else @lang('dentalink.blades.create_order.step_title_lab')
                     @endif
                 </div>
-                <form wire:submit="{{ $currentStep === 3 ? 'nextStep' : 'nextStep' }}">
+                <form wire:submit="nextStep">
                     {{ $this->form }}
                     <div style="display:flex;gap:8px;margin-top:16px;">
                         @if ($currentStep > 1)
@@ -34,8 +34,18 @@
             @else
                 <div class="card-title">@lang('dentalink.blades.create_order.step_title_review')</div>
                 <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">@lang('dentalink.blades.create_order.review_hint')</p>
-                <button type="button" wire:click="submitOrder" class="dentalink-btn dentalink-btn-primary" style="width:100%;justify-content:center;">
-                    @lang('dentalink.blades.create_order.submit_order', ['amount' => number_format($this->getTotal(), 2)])
+
+                <div style="margin-bottom:16px;">
+                    {{ $this->form }}
+                </div>
+
+                <button type="button" wire:click="submitOrder" wire:loading.attr="disabled" class="dentalink-btn dentalink-btn-primary" style="width:100%;justify-content:center;">
+                    <span wire:loading.remove wire:target="submitOrder">
+                        @lang('dentalink.blades.create_order.submit_order', ['amount' => number_format($this->getTotal(), 2)])
+                    </span>
+                    <span wire:loading wire:target="submitOrder">
+                        @lang('dentalink.blades.create_order.redirecting_payment')
+                    </span>
                 </button>
             @endif
         </div>

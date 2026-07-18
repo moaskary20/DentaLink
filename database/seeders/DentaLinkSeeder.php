@@ -301,5 +301,8 @@ class DentaLinkSeeder extends Seeder
         CommissionSetting::create(['name' => 'Platform Commission (Standard)', 'slug' => 'standard', 'rate' => 5.00, 'description' => 'Standard order commission']);
         CommissionSetting::create(['name' => 'Express Orders', 'slug' => 'express', 'rate' => 7.00, 'description' => 'Express order commission']);
         CommissionSetting::create(['name' => 'Premium Labs', 'slug' => 'premium', 'rate' => 3.00, 'description' => 'Premium lab commission rate']);
+
+        \App\Models\PaymentGateway::for(\App\Enums\PaymentGatewayProvider::Stripe);
+        \App\Models\PaymentGateway::for(\App\Enums\PaymentGatewayProvider::Paypal);
     }
 }

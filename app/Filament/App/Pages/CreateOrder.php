@@ -3,11 +3,13 @@
 namespace App\Filament\App\Pages;
 
 use App\Enums\ApprovalStatus;
+use App\Enums\PaymentGatewayProvider;
 use App\Models\Lab;
 use App\Models\LabService;
 use App\Services\AiAssistantService;
 use App\Services\CommissionService;
 use App\Services\OrderWorkflowService;
+use App\Services\PaymentGatewayService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -50,11 +52,30 @@ class CreateOrder extends Page implements HasForms
 
     public function mount(): void
     {
+        $defaultMethod = collect(app(PaymentGatewayService::class)->availableMethods())
+            ->first()?->value ?? PaymentGatewayProvider::Wallet->value;
+
         $this->form->fill([
             'is_express' => false,
             'shade' => 'A2',
             'material' => 'Zirconia',
+            'payment_method' => $defaultMethod,
         ]);
+
+        if ($error = session('error')) {
+            Notification::make()
+                ->title(__('dentalink.notifications.order_create_failed'))
+                ->body($error)
+                ->danger()
+                ->send();
+        }
+
+        if (session('success')) {
+            Notification::make()
+                ->title(session('success'))
+                ->success()
+                ->send();
+        }
     }
 
     public function form(Form $form): Form
@@ -121,6 +142,16 @@ class CreateOrder extends Page implements HasForms
                     ->searchable()
                     ->required()
                     ->visible(fn () => $this->currentStep === 3),
+                Forms\Components\Radio::make('payment_method')
+                    ->label(__('dentalink.fields.payment_method'))
+                    ->options(fn () => collect(app(PaymentGatewayService::class)->availableMethodOptions())
+                        ->mapWithKeys(fn (array $method) => [
+                            $method['value'] => $method['icon'].' '.$method['label'],
+                        ])
+                        ->all())
+                    ->required()
+                    ->columns(1)
+                    ->visible(fn () => $this->currentStep === 4),
             ])
             ->statePath('data');
     }
@@ -190,6 +221,11 @@ class CreateOrder extends Page implements HasForms
             ->format('M j, Y');
     }
 
+    public function getPaymentMethods(): array
+    {
+        return app(PaymentGatewayService::class)->availableMethodOptions();
+    }
+
     public function submitOrder(): void
     {
         try {
@@ -199,14 +235,41 @@ class CreateOrder extends Page implements HasForms
                 isset($data['video']) ? (array) $data['video'] : []
             );
 
-            $order = app(OrderWorkflowService::class)->createOrder(Auth::user(), $data);
+            $paymentMethod = PaymentGatewayProvider::tryFrom($data['payment_method'] ?? '')
+                ?? PaymentGatewayProvider::Wallet;
+
+            unset($data['payment_method']);
+
+            if ($paymentMethod === PaymentGatewayProvider::Wallet) {
+                $order = app(OrderWorkflowService::class)->createOrder(
+                    Auth::user(),
+                    $data,
+                    PaymentGatewayProvider::Wallet,
+                );
+
+                Notification::make()
+                    ->title(__('dentalink.notifications.order_created'))
+                    ->success()
+                    ->send();
+
+                $this->redirect(OrderTracking::getUrl(['order' => $order->order_number]));
+
+                return;
+            }
+
+            $checkoutUrl = app(PaymentGatewayService::class)->initiateCheckout(
+                Auth::user(),
+                $data,
+                $paymentMethod,
+                $this->getTotal(),
+            );
 
             Notification::make()
-                ->title(__('dentalink.notifications.order_created'))
+                ->title(__('dentalink.notifications.redirecting_to_payment'))
                 ->success()
                 ->send();
 
-            $this->redirect(OrderTracking::getUrl(['order' => $order->order_number]));
+            $this->redirect($checkoutUrl, navigate: false);
         } catch (\Throwable $e) {
             Notification::make()
                 ->title(__('dentalink.notifications.order_create_failed'))

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ApprovalStatus;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentGatewayProvider;
 use App\Enums\PaymentStatus;
 use App\Enums\TransactionType;
 use App\Models\ApprovalRequest;
@@ -28,9 +29,18 @@ class OrderWorkflowService
         protected NotificationService $notificationService,
     ) {}
 
-    public function createOrder(User $doctor, array $data): Order
-    {
-        return DB::transaction(function () use ($doctor, $data) {
+    public function createOrder(
+        User $doctor,
+        array $data,
+        PaymentGatewayProvider|string|null $paymentMethod = null,
+        ?string $paymentReference = null,
+    ): Order {
+        $paymentMethod = $paymentMethod instanceof PaymentGatewayProvider
+            ? $paymentMethod
+            : PaymentGatewayProvider::tryFrom((string) ($paymentMethod ?? PaymentGatewayProvider::Wallet->value))
+                ?? PaymentGatewayProvider::Wallet;
+
+        return DB::transaction(function () use ($doctor, $data, $paymentMethod, $paymentReference) {
             $service = \App\Models\LabService::query()->findOrFail($data['lab_service_id']);
             $lab = Lab::query()->findOrFail($data['lab_id']);
 
@@ -42,7 +52,9 @@ class OrderWorkflowService
             $commission = $this->commissionService->calculate($cost, (bool) ($data['is_express'] ?? false), (bool) $lab->is_featured);
             $total = $cost + $commission;
 
-            $this->chargeWallet($doctor, $total, null);
+            if ($paymentMethod === PaymentGatewayProvider::Wallet) {
+                $this->chargeWallet($doctor, $total, null);
+            }
 
             $predictedDelivery = $data['expected_delivery_at']
                 ?? now()->addDays($service->turnaround_days + (($data['is_express'] ?? false) ? -2 : 0));
@@ -69,14 +81,15 @@ class OrderWorkflowService
             $this->createStages($order);
             $this->persistAttachments($order, $data['attachments'] ?? []);
             $this->createInvoice($order);
-            $this->recordPayment($doctor, $order, $total);
+            $this->recordPayment($doctor, $order, $total, $paymentMethod, $paymentReference);
             $this->createConversation($order);
 
+            $paymentLabel = $paymentMethod->label();
             OrderLog::query()->create([
                 'order_id' => $order->id,
                 'user_id' => $doctor->id,
                 'icon' => '📩',
-                'message' => 'Order received and payment confirmed',
+                'message' => "Order received and payment confirmed via {$paymentLabel}",
             ]);
 
             $this->notificationService->notifyOrderUpdate(
@@ -222,20 +235,28 @@ class OrderWorkflowService
         ]);
     }
 
-    protected function recordPayment(User $doctor, Order $order, float $total): void
-    {
+    protected function recordPayment(
+        User $doctor,
+        Order $order,
+        float $total,
+        PaymentGatewayProvider $paymentMethod = PaymentGatewayProvider::Wallet,
+        ?string $paymentReference = null,
+    ): void {
         $wallet = Wallet::query()->firstOrCreate(
             ['user_id' => $doctor->id],
             ['balance' => 0, 'currency' => 'USD']
         );
 
+        $via = $paymentMethod->label();
+
         Transaction::query()->create([
             'wallet_id' => $wallet->id,
             'order_id' => $order->id,
             'type' => TransactionType::Payment,
-            'description' => "{$order->service_name} — {$order->lab?->name}",
+            'description' => "{$order->service_name} — {$order->lab?->name} ({$via})",
             'amount' => -$total,
             'status' => PaymentStatus::Completed,
+            'reference' => $paymentReference,
         ]);
     }
 
